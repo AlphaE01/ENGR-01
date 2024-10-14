@@ -1,20 +1,12 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
+export default {
   plugins: [react()],
+  base: '/',
   build: {
     rollupOptions: {
-      external: [
-        'firebase/app',
-        'firebase/firestore',
-        'firebase/storage', // Add firebase/storage as external
-        'firebase/auth',
-        'firebase/analytics',
-      ],
+      external: ['firebase/storage', 'firebase/app', 'firebase/auth'],
     },
     commonjsOptions: {
       transformMixedEsModules: true,
     },
   },
-});
+};
