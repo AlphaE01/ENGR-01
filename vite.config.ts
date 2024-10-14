@@ -1,8 +1,5 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
+export default {
+  base: './', // Ensure correct base path
   build: {
     rollupOptions: {
       external: [
@@ -10,12 +7,11 @@ export default defineConfig({
         'firebase/firestore',
         'firebase/storage',
         'firebase/auth',
-        'firebase/analytics',
-      ],
+        'firebase/analytics'
+      ]
     },
     commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-  },
-  base: './', // Update base path to ensure proper loading of assets
-});
+      transformMixedEsModules: true
+    }
+  }
+};
