@@ -1,7 +1,6 @@
-// src/pages/Team.tsx
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig"; // Ensure this is the correct path
+import { db } from "../firebaseConfig";
 
 type TeamMember = {
   name: string;
@@ -13,6 +12,7 @@ type TeamMember = {
 
 const Team: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -22,11 +22,21 @@ const Team: React.FC = () => {
         setTeamMembers(members);
       } catch (error) {
         console.error("Error fetching team members: ", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchTeamMembers();
   }, []);
+
+  if (loading) {
+    return <p>Loading team members...</p>;
+  }
+
+  if (teamMembers.length === 0) {
+    return <p>No team members available.</p>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
