@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import React from "react";
 
 type TeamMember = {
   name: string;
@@ -11,32 +9,16 @@ type TeamMember = {
 };
 
 const Team: React.FC = () => {
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const fetchTeamMembers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "teamMembers"));
-        const members = querySnapshot.docs.map((doc) => doc.data() as TeamMember);
-        setTeamMembers(members);
-      } catch (error) {
-        console.error("Error fetching team members: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeamMembers();
-  }, []);
-
-  if (loading) {
-    return <p>Loading team members...</p>;
-  }
-
-  if (teamMembers.length === 0) {
-    return <p>No team members available.</p>;
-  }
+  const teamMembers: TeamMember[] = [
+    {
+      name: "John Doe",
+      role: "President",
+      yearOfService: "2022 - 2024",
+      description: "Leading the society to new heights.",
+      imageUrl: "/path/to/placeholder-image.jpg",
+    },
+    // Add other members if needed.
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
