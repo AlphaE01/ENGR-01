@@ -23,12 +23,18 @@ const AdminPortal: React.FC = () => {
   const { register, handleSubmit, reset } = useForm<TeamMember>();
   const { register: registerLogin, handleSubmit: handleLoginSubmit } = useForm<LoginForm>();
 
+  // Fetch team members from local storage when the component mounts
   useEffect(() => {
-    // Fetch initial team member data (replace with an actual API call)
-    fetch('/api/team-members')
-      .then(response => response.json())
-      .then(data => setTeamMembers(data));
+    const storedMembers = localStorage.getItem('teamMembers');
+    if (storedMembers) {
+      setTeamMembers(JSON.parse(storedMembers));
+    }
   }, []);
+
+  // Save the team members to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem('teamMembers', JSON.stringify(teamMembers));
+  }, [teamMembers]);
 
   // Login handler to check username and password
   const onLoginSubmit = (data: LoginForm) => {
@@ -57,12 +63,12 @@ const AdminPortal: React.FC = () => {
     }
 
     if (editingMember) {
-      // Update an existing member (replace with an actual API call)
+      // Update an existing member
       setTeamMembers(prevMembers =>
         prevMembers.map(member => (member.id === editingMember.id ? { ...data, imageUrl } : member))
       );
     } else {
-      // Add a new member (replace with an actual API call)
+      // Add a new member
       setTeamMembers([...teamMembers, { ...data, imageUrl, id: Date.now().toString() }]);
     }
 
@@ -78,7 +84,6 @@ const AdminPortal: React.FC = () => {
 
   // Handle deleting of a team member
   const handleDelete = (id: string) => {
-    // Delete a member (replace with an actual API call)
     setTeamMembers(prevMembers => prevMembers.filter(member => member.id !== id));
   };
 
