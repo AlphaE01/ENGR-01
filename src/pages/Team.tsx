@@ -1,7 +1,7 @@
 // src/pages/Team.tsx
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db } from "../firebaseConfig"; // Ensure this is the correct path
 
 type TeamMember = {
   name: string;
