@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+\import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 type TeamMember = {
@@ -19,6 +19,7 @@ const AdminPortal: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { register, handleSubmit, reset } = useForm<TeamMember>();
   const { register: registerLogin, handleSubmit: handleLoginSubmit } = useForm<LoginForm>();
 
@@ -38,17 +39,33 @@ const AdminPortal: React.FC = () => {
     }
   };
 
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   // Form submission handler for adding/editing team members
   const onSubmit = (data: TeamMember) => {
+    let imageUrl = data.imageUrl;
+
+    if (imageFile) {
+      // Generate a URL for the uploaded image
+      imageUrl = URL.createObjectURL(imageFile);
+      setImageFile(null);
+    }
+
     if (editingMember) {
       // Update an existing member (replace with an actual API call)
       setTeamMembers(prevMembers =>
-        prevMembers.map(member => (member.id === editingMember.id ? data : member))
+        prevMembers.map(member => (member.id === editingMember.id ? { ...data, imageUrl } : member))
       );
     } else {
       // Add a new member (replace with an actual API call)
-      setTeamMembers([...teamMembers, { ...data, id: Date.now().toString() }]);
+      setTeamMembers([...teamMembers, { ...data, imageUrl, id: Date.now().toString() }]);
     }
+
     reset();
     setEditingMember(null);
   };
@@ -63,6 +80,11 @@ const AdminPortal: React.FC = () => {
   const handleDelete = (id: string) => {
     // Delete a member (replace with an actual API call)
     setTeamMembers(prevMembers => prevMembers.filter(member => member.id !== id));
+  };
+
+  // Logout handler
+  const handleLogout = () => {
+    setIsLoggedIn(false);
   };
 
   if (!isLoggedIn) {
@@ -106,6 +128,9 @@ const AdminPortal: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-3xl font-bold mb-4">Admin Dashboard</h2>
+      <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-8">
+        Logout
+      </button>
 
       <h3 className="text-2xl font-bold mb-4">{editingMember ? 'Edit Team Member' : 'Add Team Member'}</h3>
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -155,13 +180,13 @@ const AdminPortal: React.FC = () => {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="imageUrl">
-            Image URL
+            Upload Image
           </label>
           <input
-            {...register('imageUrl', { required: 'Image URL is required' })}
+            type="file"
+            onChange={handleFileChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="imageUrl"
-            type="text"
+            id="imageUpload"
           />
         </div>
         <button
