@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  base: './',  // Added base path for correct asset resolution during deployment
   build: {
     rollupOptions: {
       external: [
@@ -18,3 +19,4 @@ export default defineConfig({
     },
   },
 });
+
