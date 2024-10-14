@@ -7,6 +7,12 @@ type TeamMember = {
   role: string;
   description: string;
   imageUrl: string;
+  year: string;
+};
+
+type LoginForm = {
+  username: string;
+  password: string;
 };
 
 const AdminPortal: React.FC = () => {
@@ -14,37 +20,88 @@ const AdminPortal: React.FC = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const { register, handleSubmit, reset } = useForm<TeamMember>();
+  const { register: registerLogin, handleSubmit: handleLoginSubmit } = useForm<LoginForm>();
 
   useEffect(() => {
-    // Fetch initial team member data (replace with API call)
+    // Fetch initial team member data (replace with an actual API call)
     fetch('/api/team-members')
       .then(response => response.json())
       .then(data => setTeamMembers(data));
   }, []);
 
+  // Login handler to check username and password
+  const onLoginSubmit = (data: LoginForm) => {
+    if (data.username === 'admin' && data.password === 'password123') {
+      setIsLoggedIn(true);
+    } else {
+      alert('Invalid username or password');
+    }
+  };
+
+  // Form submission handler for adding/editing team members
   const onSubmit = (data: TeamMember) => {
     if (editingMember) {
-      // Update an existing member (replace with API call)
+      // Update an existing member (replace with an actual API call)
       setTeamMembers(prevMembers =>
         prevMembers.map(member => (member.id === editingMember.id ? data : member))
       );
     } else {
-      // Add a new member (replace with API call)
+      // Add a new member (replace with an actual API call)
       setTeamMembers([...teamMembers, { ...data, id: Date.now().toString() }]);
     }
     reset();
     setEditingMember(null);
   };
 
+  // Handle editing of a team member
   const handleEdit = (member: TeamMember) => {
     setEditingMember(member);
     reset(member);
   };
 
+  // Handle deleting of a team member
   const handleDelete = (id: string) => {
-    // Delete a member (replace with API call)
+    // Delete a member (replace with an actual API call)
     setTeamMembers(prevMembers => prevMembers.filter(member => member.id !== id));
   };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="text-3xl font-bold mb-4">Admin Login</h2>
+        <form onSubmit={handleLoginSubmit(onLoginSubmit)} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+              Username
+            </label>
+            <input
+              {...registerLogin('username', { required: 'Username is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="username"
+              type="text"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              Password
+            </label>
+            <input
+              {...registerLogin('password', { required: 'Password is required' })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="password"
+              type="password"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Login
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -72,6 +129,18 @@ const AdminPortal: React.FC = () => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="role"
             type="text"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="year">
+            Year of Service
+          </label>
+          <input
+            {...register('year', { required: 'Year of service is required' })}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="year"
+            type="text"
+            placeholder="e.g., 2022 - 2024"
           />
         </div>
         <div className="mb-4">
@@ -126,6 +195,7 @@ const AdminPortal: React.FC = () => {
             />
             <h2 className="text-xl font-semibold mb-2">{member.name}</h2>
             <h3 className="text-lg text-gray-600 mb-2">{member.role}</h3>
+            <p className="text-gray-700 mb-2">Year of Service: {member.year}</p>
             <p className="text-gray-700 mb-4">{member.description}</p>
             <button
               onClick={() => handleEdit(member)}
