@@ -10,11 +10,12 @@ export default defineConfig({
         'firebase/firestore',
         'firebase/storage',
         'firebase/auth',
-        'firebase/analytics',  // Add firebase/analytics as external
+        'firebase/analytics',
       ],
     },
     commonjsOptions: {
       transformMixedEsModules: true,
     },
   },
+  base: './', // Update base path to ensure proper loading of assets
 });
