@@ -1,59 +1,43 @@
-// src/pages/AdminPortal.tsx
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore";
-import { storage, db } from "../firebaseConfig";
+// src/pages/Team.tsx
+import React, { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
-const AdminPortal: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
+const Team: React.FC = () => {
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
-  const onSubmit = async (data: any) => {
-    // Handle Image Upload
-    if (data.image[0]) {
-      const imageFile = data.image[0];
-      const storageRef = ref(storage, `team-images/${imageFile.name}`);
-      await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(storageRef);
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      const querySnapshot = await getDocs(collection(db, "teamMembers"));
+      const members = querySnapshot.docs.map((doc) => doc.data());
+      setTeamMembers(members);
+    };
 
-      // Save Team Member Data in Firestore
-      const teamRef = collection(db, "teamMembers");
-      await addDoc(teamRef, {
-        name: data.name,
-        role: data.role,
-        yearOfService: data.yearOfService,
-        description: data.description,
-        imageUrl: imageUrl,
-      });
-
-      reset(); // Reset the form after submission
-      alert("Team member added successfully!");
-    }
-  };
+    fetchTeamMembers();
+  }, []);
 
   return (
-    <div>
-      {isLoggedIn ? (
-        <div>
-          <h2>Add Team Member</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <input {...register("name")} placeholder="Name" required />
-            <input {...register("role")} placeholder="Role" required />
-            <input {...register("yearOfService")} placeholder="Year of Service" required />
-            <textarea {...register("description")} placeholder="Description" required />
-            <input {...register("image")} type="file" accept="image/*" required />
-            <button type="submit">Add Member</button>
-          </form>
-        </div>
-      ) : (
-        <div>
-          <h2>Admin Login</h2>
-          {/* Add login form here */}
-        </div>
-      )}
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Our Team</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {teamMembers.map((member, index) => (
+          <div key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
+            <img
+              src={member.imageUrl}
+              alt={member.name}
+              className="w-full h-64 object-cover"
+            />
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-2">{member.name}</h2>
+              <h3 className="text-lg text-gray-600 mb-2">{member.role}</h3>
+              <p className="text-gray-700">{member.description}</p>
+              <p className="text-gray-500">Year of Service: {member.yearOfService}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default AdminPortal;
+export default Team;
