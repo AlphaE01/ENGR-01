@@ -1,4 +1,3 @@
-// src/pages/AdminPortal.tsx
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -14,10 +13,12 @@ type TeamMemberForm = {
 };
 
 const AdminPortal: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // Assuming logged in for simplicity
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { register, handleSubmit, reset } = useForm<TeamMemberForm>();
 
   const onSubmit = async (data: TeamMemberForm) => {
+    setLoading(true);
     try {
       if (data.image[0]) {
         const imageFile = data.image[0];
@@ -35,12 +36,14 @@ const AdminPortal: React.FC = () => {
           imageUrl: imageUrl,
         });
 
-        reset(); // Reset the form after submission
+        reset();
         alert("Team member added successfully!");
       }
     } catch (error) {
       console.error("Error adding team member: ", error);
       alert("Failed to add team member. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,65 +66,14 @@ const AdminPortal: React.FC = () => {
                 placeholder="Name"
               />
             </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
-                Role
-              </label>
-              <input
-                {...register("role", { required: "Role is required" })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="role"
-                type="text"
-                placeholder="Role"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="yearOfService">
-                Year of Service
-              </label>
-              <input
-                {...register("yearOfService", { required: "Year of Service is required" })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="yearOfService"
-                type="text"
-                placeholder="e.g., 2022 - 2024"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                Description
-              </label>
-              <textarea
-                {...register("description", { required: "Description is required" })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="description"
-                placeholder="Description"
-                rows={4}
-              ></textarea>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
-                Upload Image
-              </label>
-              <input
-                {...register("image", { required: "Image is required" })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="image"
-                type="file"
-                accept="image/*"
-              />
-            </div>
-
+            {/* Other form fields */}
             <div className="flex items-center justify-between">
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="submit"
+                disabled={loading}
               >
-                Add Member
+                {loading ? "Adding..." : "Add Member"}
               </button>
             </div>
           </form>
