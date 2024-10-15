@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 type TeamMember = {
+  id: string;
   name: string;
   role: string;
   yearOfService: string;
@@ -9,23 +12,42 @@ type TeamMember = {
 };
 
 const Team: React.FC = () => {
-  const teamMembers: TeamMember[] = [
-    {
-      name: "John Doe",
-      role: "President",
-      yearOfService: "2022 - 2024",
-      description: "Leading the society to new heights.",
-      imageUrl: "/path/to/placeholder-image.jpg",
-    },
-    // Add other members if needed.
-  ];
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "teamMembers"));
+        const members = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as TeamMember[];
+        setTeamMembers(members);
+      } catch (error) {
+        console.error("Error fetching team members: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
+
+  if (loading) {
+    return <p>Loading team members...</p>;
+  }
+
+  if (teamMembers.length === 0) {
+    return <p>No team members available.</p>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Our Team</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {teamMembers.map((member, index) => (
-          <div key={index} className="bg-white shadow-md rounded-lg overflow-hidden">
+        {teamMembers.map((member) => (
+          <div key={member.id} className="bg-white shadow-md rounded-lg overflow-hidden">
             {member.imageUrl && (
               <img
                 src={member.imageUrl}
@@ -47,3 +69,5 @@ const Team: React.FC = () => {
 };
 
 export default Team;
+
+   
